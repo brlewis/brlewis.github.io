@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mithril example</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flux/2.1.1/Flux.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mithril/0.2.0/mithril.js"></script>
+    <script src="https://cdn.rawgit.com/insin/msx/master/dist/MSXTransformer.js"></script>
+  </head>
+
+  <body>
+    <div id="app"></div>
+    <script type="text/msx;harmony=true">void function() {
+'use strict';
+
+// Begin library functions needed to implement Flux with Mithril
+
+function FluxController(attributes) {
+    // Let the store be the view's first parameter in place of controller.
+    return attributes.store;
+}
+
+// End library functions needed to implement Flux with Mithril
+
+// The Hello component, for use with MainStore
+var Hello = {
+    controller: FluxController,
+
+    view: function(store) {
+        return <h1>Hello {store.who}!</h1>
+    }
+}
+
+// The ChangeName component, for use with MainStore
+var ChangeName = {
+    controller: FluxController,
+
+    view: function(store) {
+        return <p>Your name: <input onchange={m.withAttr('value', store.setWho)} value={store.who} /></p>
+    }
+}
+
+// NameChangeStore, loosely coupled to MainStore thanks to the dispatcher.
+function NameChangeStore(dispatcher) {
+    var store = this;
+    store.count = 0;
+    function handler(payload) {
+        if (payload.type === 'who') {
+            store.count++;
+        }
+    }
+    store.dispatcher = dispatcher;
+    store.dispatchToken = dispatcher.register(handler);
+    return store;
+}
+
+// The NameChangeCount component, for use with NameChangeStore
+var NameChangeCount = {
+    controller: FluxController,
+
+    view: function(store) {
+        return <p>Name change count: {store.count}</p>;
+    }
+};
+
+
+var mainDispatcher = new Flux.Dispatcher();
+
+function MainStore(dispatcher) {
+    var store = this;
+    function handler(payload) {
+        if (payload.type === 'who') {
+            store.who = payload.who;
+        }
+    }
+
+    store.dispatcher = dispatcher;
+    store.dispatchToken = dispatcher.register(handler);
+    store.who = 'World';
+    store.setWho = function(who) {
+        dispatcher.dispatch({type: 'who', who: who});
+    }
+    return this;
+}
+
+var mainStore = new MainStore(mainDispatcher);
+var nameChangeStore = new NameChangeStore(mainDispatcher);
+
+var Main = {
+    view: function() {
+        return <div>
+                 <Hello store={mainStore} />
+                 <ChangeName store={mainStore} />
+                 <NameChangeCount store={nameChangeStore} />
+               </div>;
+    }
+}
+      
+m.mount(document.getElementById('app'), Main)
+
+}()</script>
+    
+  </body>
+</html>
