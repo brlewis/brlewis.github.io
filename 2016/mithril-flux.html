@@ -2,14 +2,14 @@
 <html>
   <head>
     <title>Mithril-Flux example</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flux/2.1.1/Flux.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flux/2.1.1/Flux.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mithril/0.2.0/mithril.js"></script>
     <script src="https://cdn.rawgit.com/insin/msx/master/dist/MSXTransformer.js"></script>
   </head>
 
   <body>
     <div id="app"></div>
-    <script type="text/msx;harmony=true">void function() {
+    <script type="text/msx;harmony=true">
 'use strict';
 
 /*
@@ -69,7 +69,8 @@ var Hello = {
     view: function(store) {
         return <h1>Hello {store.who}!</h1>
     }
-}
+};
+
 /*
  * If you're surprised to see HTML embedded in JavaScript, read
  * https://github.com/insin/msx
@@ -90,7 +91,7 @@ var ChangeName = {
     view: function(store) {
         return <p>Your name: <input onchange={m.withAttr('value', store.setWho)} value={store.who} /></p>
     }
-}
+};
 
 /*
  * However, when you look in Hello World's main store it's obvious
@@ -160,6 +161,48 @@ var NameCount = {
 };
 
 /*
+ * You can skip down to where mainDispatcher is defined if you want to
+ * see how all this gets tied together. This next example store and
+ * component isn't something you'll do often. It illustrates what
+ * Dispatcher's waitFor method is good for.
+ */
+
+function NameCountCommentaryStore(dispatcher, nameCountStore) {
+    var comments = ['',
+                    'Way to be consistent!',
+                    'That\'s how many moons Mars has.',
+                    'That\'s how many sides a triangle has.',
+                    'That\'s a typical number of beats in a measure of music.',
+                    'Jackson 5 was a great band.'];
+    var store = this;
+
+    function handler(payload) {
+        if (payload.type === 'who') {
+            console.log(nameCountStore.dispatchToken);
+            dispatcher.waitFor([nameCountStore.dispatchToken]);
+            if (nameCountStore.count > comments.length) {
+                store.comment = 'That\'s a lot of names!';
+            } else {
+                store.comment = comments[nameCountStore.count];
+            }
+        }
+    }
+    store.dispatcher = dispatcher;
+    store.dispatchToken = dispatcher.register(handler);
+    return store;
+}
+
+var NameCountCommentary = {
+    controller: FluxController,
+
+    view: function(store) {
+        return <p>{store.comment}</p>;
+    }
+};
+
+
+
+/*
  * Up to this point everything's been a reusable store or Mithril
  * component. Now it's time to tie it all together into an app. We
  * instantiate a single dispatcher and use tie it to our stores.
@@ -168,6 +211,8 @@ var NameCount = {
 var mainDispatcher = new Flux.Dispatcher();
 var mainStore = new MainStore(mainDispatcher);
 var nameCountStore = new NameCountStore(mainDispatcher);
+var nameCountCommentaryStore =
+    new NameCountCommentaryStore(mainDispatcher, nameCountStore);
 mainStore.setWho('World');
 
 /*
@@ -183,6 +228,7 @@ var Main = {
                  <Hello store={mainStore} />
                  <ChangeName store={mainStore} />
                  <NameCount store={nameCountStore} />
+                 <NameCountCommentary store={nameCountCommentaryStore} />
                </div>;
     }
 }
@@ -193,7 +239,7 @@ var Main = {
 
 m.mount(document.getElementById('app'), Main)
 
-}()</script>
+</script>
     
   </body>
 </html>
