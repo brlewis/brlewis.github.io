@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Table Topics Timer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flux/2.1.1/Flux.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mithril/0.2.0/mithril.js"></script>
+    <script src="https://cdn.rawgit.com/insin/msx/master/dist/MSXTransformer.js"></script>
+    <style>
+     #timer {
+         font-family: sans-serif;
+         font-weight: bold;
+         width: 100%;
+         text-align: center;
+     }
+     .time-minimum {
+         background-color: green;
+     }
+     .time-warning {
+         background-color: yellow;
+     }
+     .time-maximum {
+         background-color: red;
+     }
+    </style>
+  </head>
+
+  <body>
+    <div id="app">
+        <div id="timer">20:00</div>
+    </div>
+    <script type="text/msx;harmony=true">
+'use strict';
+
+var TimerApp = {
+    controller: function() {
+        var ctrl = this;
+        ctrl.elapsed = 0;
+        ctrl.minimum = 6;
+        ctrl.warning = 9;
+        ctrl.maximum = 12;
+        ctrl.status = 'time-early';
+        function tick() {
+            m.startComputation();
+            ctrl.elapsed++;
+            if (ctrl.elapsed < ctrl.minimum) {
+                ctrl.status = 'time-early';
+            };
+            if (ctrl.minimum <= ctrl.elapsed && ctrl.elapsed < ctrl.warning) {
+                ctrl.status = 'time-minimum';
+            }
+            if (ctrl.warning <= ctrl.elapsed && ctrl.elapsed < ctrl.maximum) {
+                ctrl.status = 'time-warning';
+            }
+            if (ctrl.elapsed >= ctrl.maximum) {
+                ctrl.status = 'time-maximum';
+            }
+            m.endComputation();
+        }
+        ctrl.start = function() {
+            ctrl.ticker = setInterval(tick, 1000);
+        };
+        ctrl.stop = function() {
+            clearInterval(ctrl.ticker);
+            ctrl.ticker = false;
+        };
+        ctrl.startstop = function() {
+            if (ctrl.ticker) {
+                ctrl.stop();
+            } else {
+                ctrl.start();
+            }
+        };
+        ctrl.reset = function() {
+            ctrl.stop();
+            ctrl.elapsed = 0;
+            ctrl.status = 'time-early';
+        };
+        function twoDigit(num) {
+            return num < 10 ? '0' + num : num;
+        }
+        ctrl.display = function() {
+            return Math.floor(ctrl.elapsed/60) + ':' + twoDigit(ctrl.elapsed % 60);
+        }
+    },
+    view: function(ctrl) {
+        console.log('view');
+        return <div>
+            <div id="timer" className={ctrl.status} style={'font-size: ' + Math.floor(window.innerWidth/3) + 'px'}>{ctrl.display()}</div>
+            <p>
+              <button onclick={ctrl.startstop}>Start/Stop</button>
+              <button onclick={ctrl.reset}>Reset</button>
+            </p>
+            </div>;
+    }
+};
+
+m.mount(document.getElementById('app'), TimerApp);
+
