@@ -6,11 +6,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mithril/0.2.0/mithril.js"></script>
     <script src="https://cdn.rawgit.com/insin/msx/master/dist/MSXTransformer.js"></script>
     <style>
+     body {
+         margin: 0
+     }
      #timer {
          font-family: sans-serif;
          font-weight: bold;
-         width: 100%;
+         font-size: 36vw;
+         margin: 0;
+         padding: 0;
          text-align: center;
+         width: 100%;
      }
      .time-minimum {
          background-color: green;
@@ -34,11 +40,14 @@
 var TimerApp = {
     controller: function() {
         var ctrl = this;
+        ctrl.startTime = (new Date()).getTime();
+        ctrl.previous = 0;
         ctrl.elapsed = 0;
         ctrl.minimum = 6;
         ctrl.warning = 9;
         ctrl.maximum = 12;
         ctrl.status = 'time-early';
+
         function tick() {
             m.startComputation();
             ctrl.elapsed++;
@@ -56,13 +65,17 @@ var TimerApp = {
             }
             m.endComputation();
         }
+
         ctrl.start = function() {
+            ctrl.startTime = (new Date()).getTime();
             ctrl.ticker = setInterval(tick, 1000);
         };
+
         ctrl.stop = function() {
             clearInterval(ctrl.ticker);
             ctrl.ticker = false;
         };
+
         ctrl.startstop = function() {
             if (ctrl.ticker) {
                 ctrl.stop();
@@ -70,22 +83,26 @@ var TimerApp = {
                 ctrl.start();
             }
         };
+
         ctrl.reset = function() {
             ctrl.stop();
             ctrl.elapsed = 0;
+            ctrl.previous = 0;
             ctrl.status = 'time-early';
         };
+
         function twoDigit(num) {
             return num < 10 ? '0' + num : num;
         }
+
         ctrl.display = function() {
-            return Math.floor(ctrl.elapsed/60) + ':' + twoDigit(ctrl.elapsed % 60);
+            return Math.floor(ctrl.elapsed/60) + ':' + twoDigit(Math.floor(ctrl.elapsed % 60));
         }
     },
     view: function(ctrl) {
         console.log('view');
         return <div>
-            <div id="timer" className={ctrl.status} style={'font-size: ' + Math.floor(window.innerWidth/3) + 'px'}>{ctrl.display()}</div>
+            <div id="timer" className={ctrl.status}>{ctrl.display()}</div>
             <p>
               <button onclick={ctrl.startstop}>Start/Stop</button>
               <button onclick={ctrl.reset}>Reset</button>
