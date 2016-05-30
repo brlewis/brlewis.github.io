@@ -73,7 +73,10 @@ var TimerApp = {
 
         ctrl.stop = function() {
             tick();
-            clearInterval(ctrl.ticker);
+            if (ctrl.ticker) {
+                clearInterval(ctrl.ticker);
+                ctrl.ticker = false;
+            }
             ctrl.previous = ctrl.elapsed;
             ctrl.ticker = false;
         };
@@ -99,6 +102,23 @@ var TimerApp = {
 
         ctrl.display = function() {
             return Math.floor(ctrl.elapsed/60) + ':' + twoDigit(Math.floor(ctrl.elapsed % 60));
+        }
+
+        function saveBattery() {
+            if (document.hidden) {
+                if (ctrl.ticker) {
+                    clearInterval(ctrl.ticker);
+                    ctrl.ticker = false;
+                }
+            } else {
+                ctrl.ticker = setInterval(tick, 1000);
+            }
+        }
+
+        document.addEventListener('visibilitychange', saveBattery);
+
+        ctrl.onunload = function() {
+            document.removeEventListener('visibilitychange', saveBattery);
         }
     },
     view: function(ctrl) {
