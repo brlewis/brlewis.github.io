@@ -50,7 +50,7 @@ var TimerApp = {
 
         function tick() {
             m.startComputation();
-            ctrl.elapsed++;
+            ctrl.elapsed = ((new Date()).getTime() - ctrl.startTime) / 1000 + ctrl.previous;
             if (ctrl.elapsed < ctrl.minimum) {
                 ctrl.status = 'time-early';
             };
@@ -72,7 +72,9 @@ var TimerApp = {
         };
 
         ctrl.stop = function() {
+            tick();
             clearInterval(ctrl.ticker);
+            ctrl.previous = ctrl.elapsed;
             ctrl.ticker = false;
         };
 
@@ -100,7 +102,6 @@ var TimerApp = {
         }
     },
     view: function(ctrl) {
-        console.log('view');
         return <div>
             <div id="timer" className={ctrl.status}>{ctrl.display()}</div>
             <p>
