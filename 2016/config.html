@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>config attribute</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flux/2.1.1/Flux.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mithril/0.2.5/mithril.js"></script>
+    <script src="https://cdn.rawgit.com/insin/msx/master/dist/MSXTransformer.js"></script>
+  </head>
+
+  <body>
+    <div id="app">
+    </div>
+    <script type="text/msx;harmony=true">
+'use strict';
+
+function thisOneWorks() {
+    console.log('This one works.');
+}
+
+var ProductImageContainer = {
+
+    view: function(ctrl, args) {
+             return <p config={thisOneWorks}>ProductImageContainer</p>
+         }
+};
+
+function loadImages(element, isInitialized) {
+    console.log({element: element, isInitialized: isInitialized});
+}
+
+var mountElement = document.getElementById('app');
+m.mount(mountElement, <ProductImageContainer config={loadImages} />);
+
+    </script>
+  </body>
+</html>
