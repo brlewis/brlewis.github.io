@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mithril Route example</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mithril/0.2.0/mithril.js"></script>
+    <script src="https://cdn.rawgit.com/insin/msx/master/dist/MSXTransformer.js"></script>
+  </head>
+
+  <body>
+    <script type="text/msx;harmony=true">
+'use strict';
+
+var Department = {
+    view: function(ctrl, args) {
+        return <h1>Department {m.route.param('dept')}</h1>
+    }
+};
+
+var Job = {
+    view: function(ctrl, args) {
+        return <h1>Job {m.route.param('job')}</h1>
+    }
+};
+
+m.route.mode = "hash";
+m.route(document.body, 'all', {
+         'jobs/:job': Job,
+         ':dept': Department
+     });
+
+</script>
+  </body>
+</html>
