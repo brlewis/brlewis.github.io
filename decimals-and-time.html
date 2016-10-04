@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Decimals and Time</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mithril/0.2.5/mithril.js"></script>
+    <script src="https://cdn.rawgit.com/insin/msx/master/dist/MSXTransformer.js"></script>
+    <style>
+     * {
+         font-family: sans-serif;
+         font-size: 3vw;
+     }
+
+     input[type=number] {
+         width: 5em;
+         margin-left: 0.5em;
+     }
+
+
+    </style>
+  </head>
+
+  <body>
+      <h1>Time Converter</h1>
+      <div id="time-converter">
+      </div>
+      <p>See also: <a href="http://www.calculatorsoup.com/calculators/conversions/numberstowords.php">Numbers to Words Converter</a></p>
+    <script type="text/msx;harmony=true">
+'use strict';
+
+var TimeApp = {
+    controller: function() {
+        var ctrl = this;
+        ctrl.hours = m.prop(0);
+        ctrl.minutesRemainder = m.prop(0);
+        ctrl.minutesAll = m.prop(0);
+        ctrl.master = m.prop('hours');
+
+        ctrl.hourSum = function() {
+            var str = '';
+            var separator = '';
+            for (var i = 0; i < ctrl.hours(); i++) {
+                str = str + separator + '60';
+                separator = ' + ';
+            }
+            if (ctrl.minutesRemainder()) {
+                str = str + separator + ctrl.minutesRemainder();
+            }
+            return str;
+        };
+
+        ctrl.setHours = function(value) {
+            ctrl.hours(parseInt(value));
+            ctrl.master('hours');
+            ctrl.convert();
+        };
+
+        ctrl.setMinutesRemainder = function(value) {
+            ctrl.minutesRemainder(parseInt(value));
+            console.log(parseInt(value));
+            ctrl.master('hours');
+            ctrl.convert();
+        };
+
+        ctrl.setMinutesAll = function(value) {
+            ctrl.minutesAll(parseInt(value));
+            ctrl.master('minutes');
+            ctrl.convert();
+        };
+
+        ctrl.convert = function() {
+            if (ctrl.master() === 'hours') {
+                ctrl.minutesAll(ctrl.hours() * 60 + ctrl.minutesRemainder());
+            } else {
+                ctrl.hours(Math.floor(ctrl.minutesAll() / 60));
+                ctrl.minutesRemainder(ctrl.minutesAll() % 60);
+            }
+        };
+    },
+    view: function(ctrl) {
+        return <div>
+            <input type="number" onchange={m.withAttr('value', ctrl.setHours)} value={ctrl.hours()} /> hours plus
+            <input type="number" onchange={m.withAttr('value', ctrl.setMinutesRemainder)} value={ctrl.minutesRemainder()} /> minutes =
+            <input type="number" onchange={m.withAttr('value', ctrl.setMinutesAll)} value={ctrl.minutesAll()} /> minutes
+            <p>{ctrl.hourSum()}</p>
+            <p><button>Convert</button></p>
+        </div>;
+    }
+};
+
+m.mount(document.getElementById('time-converter'), TimeApp);
+
