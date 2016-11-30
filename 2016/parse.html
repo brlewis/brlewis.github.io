@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>JSON parsing</title>
+    <script src="parse.js"></script>
+  </head>
+  <body>
+    <textarea id="input" onchange={m.withAttr('value', ctrl.string)}>{}</textarea>
+    <input type="submit" value="Parse" onclick="showParseResult()" />
+    <p></p>
+  </body>
+</html>

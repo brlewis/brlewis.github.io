@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bare Component Content</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flux/2.1.1/Flux.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mithril/0.2.0/mithril.js"></script>
+    <script src="https://cdn.rawgit.com/insin/msx/master/dist/MSXTransformer.js"></script>
+  </head>
+
+  <body>
+      <h1>Look Ma, No Wrapping Element!</h1>
+      <div id="app"></div>
+      <script type="text/msx;harmony=true">
+'use strict';
+
+document.querySelectorAll('#app').forEach( el => {
+           m.mount(el, {view: () => 5});
+       });
+
+</script>
+    
+  </body>
+</html>
