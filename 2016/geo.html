@@ -1,0 +1,11 @@
+<div></div>
+<script>
+var div = document.querySelector('div');
+function log(data) {
+    var p = document.createElement('p');
+    p.textContent = (new Date()).toISOString() + JSON.stringify(data);
+    div.appendChild(p);
+}
+var watchID = navigator.geolocation.watchPosition(log);
+
+</script>
