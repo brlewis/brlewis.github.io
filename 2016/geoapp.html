@@ -6,8 +6,16 @@
 
   <body>
       <h1>Geo App</h1>
+      <div id="err" style="font-family: monospace;">
+          <p>Errors:</p>
+      </div>
       <script>
-          navigator.serviceWorker.register('geosvc.js');
+window.onerror = function(msg, url, lineNo, columnNo, error) {
+    var p = document.createElement('p');
+    p.innerText = url + ':' + lineNo + ':' + columnNo + ': ' + msg;
+    document.getElementById('err').appendChild(p);
+};
+navigator.serviceWorker.register('geosvc.js');
       </script>
   </body>
 </html>
