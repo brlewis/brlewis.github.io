@@ -29,7 +29,7 @@ function loadImages(element, isInitialized) {
 }
 
 var mountElement = document.getElementById('app');
-m.mount(mountElement, <ProductImageContainer config={loadImages} />);
+m.mount(mountElement, m(ProductImageContainer, {config: loadImages}));
 
     </script>
   </body>
