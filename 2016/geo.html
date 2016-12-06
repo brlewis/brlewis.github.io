@@ -1,13 +1,23 @@
-<div></div>
-<script>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Quickly Try Mithril 1.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+
+  <body>
+      <div></div>
+      <script>
 var div = document.querySelector('div');
-function log(data) {
+function log(position) {
     var p = document.createElement('p');
-    p.textContent = (new Date()).toISOString() + JSON.stringify(data);
+    p.textContent = (new Date()).toISOString() + ' ' + position.coords.latitude + ' ' + position.coords.longitude
     div.appendChild(p);
 }
 var watchID = navigator.geolocation.watchPosition(log);
 
 var interval = setInterval(() => log('ping!'), 15000);
 
-</script>
+      </script>
+  </body>
+</html>
