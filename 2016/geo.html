@@ -7,7 +7,17 @@
 
   <body>
       <div></div>
+
+      <div id="err" style="font-family: monospace;">
+          <p>Errors:</p>
+      </div>
+
       <script>
+window.onerror = function(msg, url, lineNo, columnNo, error) {
+    var p = document.createElement('p');
+    p.innerText = url + ':' + lineNo + ':' + columnNo + ': ' + msg;
+    document.getElementById('err').appendChild(p);
+};
 var div = document.querySelector('div');
 function log(position) {
     var p = document.createElement('p');
