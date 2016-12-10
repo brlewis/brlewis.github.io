@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Quickly Try Mithril 1.0</title>
+    <script src="//msx.codesimply.net/2016/mithril.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.18.1/babel.min.js"></script>
+  </head>
+
+  <body>
+    <div id="app"></div>
+    <button onclick="notify();">Notify</button>
+
+    <script type="text/jsx">
+'use strict';
+
+/** @jsx m */
+
+navigator.serviceWorker.register('notify.js');
+
+function notify() {
+  Notification.requestPermission(function(result) {
+    if (result === 'granted') {
+      navigator.serviceWorker.ready.then(function(registration) {
+        registration.showNotification('Vibration Sample', {
+          body: 'Buzz! Buzz!',
+          icon: '../images/touch/chrome-touch-icon-192x192.png',
+          vibrate: [200, 100, 200, 100, 200, 100, 200],
+          tag: 'vibration-sample'
+        });
+      });
+    }
+  });
+}
+    </script>
+  </body>
+</html>
