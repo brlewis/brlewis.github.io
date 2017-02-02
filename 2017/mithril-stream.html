@@ -2,201 +2,67 @@
 <html>
   <head>
     <title>Mithril-Flux example</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flux/2.1.1/Flux.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mithril/0.2.0/mithril.js"></script>
-    <script src="https://cdn.rawgit.com/insin/msx/master/dist/MSXTransformer.js"></script>
   </head>
 
   <body>
     <div id="app"></div>
-    <script type="text/msx;harmony=true">
+    <script src="http://unpkg.com/mithril/mithril.js"></script>
+    <script src="http://unpkg.com/mithril/stream/stream.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.18.1/babel.min.js"></script>
+    <script type="text/jsx">
 'use strict';
 
-/*
- * For web applications, Facebook recommends an architecture called
- * Flux, which makes it easy to answer the question, "How did my app
- * get into this state?"
- *
- * Action -> Dispatcher -> Store -> View
- *
- * A state change is represented by an Action, which you can think of
- * as an event, though it doesn't need to be implemented as any of
- * JavaScript's event objects.
- *
- * Within a Flux app, all Actions (and thus all state changes) go
- * through a single Dispatcher. Any code that needs to handle state
- * changes does so by registering a handler with the Dispatcher.
- *
- * A Store is any JavaScript object that keeps state for the app,
- * whether it's UI state or just data. An app can have just one store
- * (redux works this way), or you can split an app into multiple
- * stores for modularity. Modularity / loose coupling was the big
- * selling point for Flux I saw watching the video:
- * https://facebook.github.io/flux/docs/overview.html
- *
- * A View translates app state from the Store(s) into HTML. For Flux
- * to be practical, the View has to know how to efficiently change the
- * DOM in response to state changes, using code that reads simply as
- * if you're only ever rendering once. React does this, but on mobile
- * phones the time needed to download 133KB of JavaScript, decompress
- * it and most importantly parse/compile it is considerable. I prefer
- * Mithril because it's about one tenth the size.
- *
- * Mithril components are similar to React components, but Mithril
- * components expect the view's primary communication with the rest of
- * the app to be through a controller, an object whose constructor is
- * part of the component. Flux expects a view's primary communication
- * with the rest of the app to be through a store.
- *
- * What we need is a project to fix the impedance mismatch between
- * Mithril's default architecture and Flux's default architecture. OK,
- * here goes:
- */
-
-function FluxController(attributes) {
-    // Let the store be the view's first parameter in place of controller.
-    return attributes.store;
-}
-
-/*
- * OK, project finished. Now we can write Mithril components that look
- * like this Hello World example:
- */
+/** @jsx m */
 
 var Hello = {
-    controller: FluxController,
 
-    view: function(store) {
-        return <h1>Hello {store.who}!</h1>
+    view: vnode => {
+        const store = vnode.attrs.store;
+        return <h1>Hello {store.who()}!</h1>;
     }
-};
 
-/*
- * If you're surprised to see HTML embedded in JavaScript, read
- * https://github.com/insin/msx
- *
- * As mentioned before, in Flux, all state change within the app
- * happens via Actions sent through a central Dispatcher. To minimize
- * the amount of code in a view, I find it convenient to hide
- * implementation details in the store.
- *
- * Here's a view that changes state. Imagine writing tests for this
- * view and you'll see why I prefer not to explicitly call the
- * Dispatcher with an Action here.
- */
+};
 
 var ChangeName = {
-    controller: FluxController,
-
-    view: function(store) {
-        return <p>Your name: <input onchange={m.withAttr('value', store.setWho)} value={store.who} /></p>
+    view: vnode => {
+        const store = vnode.attrs.store;
+        return <p>Your name: <input onchange={event => store.who(event.target.value)} value={store.who()} /></p>;
     }
 };
 
-/*
- * However, when you look in Hello World's main store it's obvious
- * that the setWho method adheres to the Flux architecture. To make a
- * store easy to unit test I like to make it a constructor function
- * that takes a dispatcher argument.
- */
-
 function MainStore(dispatcher) {
-    /*
-     * Side note: I like to use meaningful variables rather than _this
-     * since the former is more readable as you go deeper into the
-     * constructor.
-     */
-    var store = this;
-
-    /*
-     * Supposing a view did want to dispatch an event directly without
-     * going through one of the store's methods, it would still want
-     * to be sure to use the same dispatcher the store is using.
-     */ 
-    store.dispatcher = dispatcher;
-
-    function handler(payload) {
-        if (payload.type === 'who') {
-            store.who = payload.who;
-        }
-    }
-    
-    store.dispatchToken = dispatcher.register(handler);
-
-    store.setWho = function(who) {
-        dispatcher.dispatch({type: 'who', who: who});
-    }
-    return this;
+    this.who = stream();
 }
 
-/*
- * Clearly there's a cost for adhering to Flux in that setWho() is
- * implemented as two functions instead of one, but what you get for
- * that cost is the ability to add new features to your app that
- * respond to this state change. These features can be very loosely
- * coupled to existing features. For example, we can add a counter of
- * how many names you've had without making any changes whatsoever to
- * preexisting code.
- */
-
-function NameCountStore(dispatcher) {
-    var store = this;
-    store.count = 0;
-    function handler(payload) {
-        if (payload.type === 'who') {
-            store.count++;
-        }
-    }
-    store.dispatcher = dispatcher;
-    store.dispatchToken = dispatcher.register(handler);
-    return store;
+function NameCountStore(mainStore) {
+    let count = 0;
+    this.counter = mainStore.who.map(() => ++count);
 }
 
 var NameCount = {
-    controller: FluxController,
-
-    view: function(store) {
-        return <p>Count of names you have had: {store.count}</p>;
+    view: vnode => {
+        const store = vnode.attrs.store;
+        return <p>Count of names you have had: {store.counter()}</p>;
     }
 };
 
-/*
- * You can skip down to where mainDispatcher is defined if you want to
- * see how all this gets tied together. This next example store and
- * component isn't something you'll do often. It illustrates what
- * Dispatcher's waitFor method is good for.
- */
-
-function NameCountCommentaryStore(dispatcher, nameCountStore) {
+function NameCountCommentaryStore(nameCountStore) {
     var comments = ['',
                     'Way to be consistent!',
                     'That\'s how many moons Mars has.',
                     'That\'s how many sides a triangle has.',
                     'That\'s a typical number of beats in a measure of music.',
                     'Jackson 5 was a great band.'];
-    var store = this;
 
-    function handler(payload) {
-        if (payload.type === 'who') {
-            console.log(nameCountStore.dispatchToken);
-            dispatcher.waitFor([nameCountStore.dispatchToken]);
-            if (nameCountStore.count > comments.length) {
-                store.comment = 'That\'s a lot of names!';
-            } else {
-                store.comment = comments[nameCountStore.count];
-            }
-        }
-    }
-    store.dispatcher = dispatcher;
-    store.dispatchToken = dispatcher.register(handler);
-    return store;
+    this.comment = nameCountStore.counter.map(count =>
+        (count > comments.length) ? 'That\'s a lot of names!' :
+            comments[count]);
 }
 
 var NameCountCommentary = {
-    controller: FluxController,
-
-    view: function(store) {
-        return <p>{store.comment}</p>;
+    view: vnode => {
+        const store = vnode.attrs.store;
+        return <p>{store.comment()}</p>;
     }
 };
 
@@ -208,12 +74,11 @@ var NameCountCommentary = {
  * instantiate a single dispatcher and use tie it to our stores.
  */ 
 
-var mainDispatcher = new Flux.Dispatcher();
-var mainStore = new MainStore(mainDispatcher);
-var nameCountStore = new NameCountStore(mainDispatcher);
+var mainStore = new MainStore();
+var nameCountStore = new NameCountStore(mainStore);
 var nameCountCommentaryStore =
-    new NameCountCommentaryStore(mainDispatcher, nameCountStore);
-mainStore.setWho('World');
+    new NameCountCommentaryStore(nameCountStore);
+mainStore.who('World');
 
 /*
  * Now the main Mithril component connects individual components to
