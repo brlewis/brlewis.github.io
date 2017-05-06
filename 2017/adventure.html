@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Text Adventure</title>
+    <link rel="stylesheet" href="https://cdn.rawgit.com/milligram/milligram/master/dist/milligram.min.css">
+    <style>
+    * { color: black; background-color: white; }
+    body { max-width: 40em; margin: auto; }
+    </style>
+  </head>
+
+  <body>
+    <h1>Text Adventure</h1>
+    <div id="app"></div>
+    <script src="https://unpkg.com/mithril/mithril.js"></script>
+    <script src="https://unpkg.com/mithril/stream/stream.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.18.1/babel.min.js"></script>
+    <script type="text/jsx">
+'use strict';
+
+/** @jsx m */
+
+const Room = {
+    oninit: ({attrs, state}) => {
+	state.roomName = m.stream('start');
+	state.room = state.roomName.map(name => attrs.adventure[name]);
+    },
+    view: ({state}) => {
+	const room = state.room();
+
+	if (!room) {
+	    return <p>Could not find {state.roomName()}.</p>;
+        }
+
+	const exits = Object.keys(room.exits);
+
+        return <div>
+	    <p>{m.trust(room.description)}</p>
+	    <p>{exits.length ? exits.map(direction => <Exit direction={direction} destination={room.exits[direction]} roomName={state.roomName} />) : <Exit direction="Start over" destination="start" roomName={state.roomName} />}</p>
+	    </div>;
+    }
+};
+
+const Exit = {
+    view: ({attrs}) => {
+	const {direction, destination, roomName} = attrs;
+	const go = () => roomName(destination);
+
+	return [<button onclick={go}>{direction}</button>, ' '];
+    }
+}
+
+m.request({url: 'mountain.json'}).then(adventure => {
+    m.mount(document.getElementById('app'), {view: () => <Room adventure={adventure} />});
+});
+
+</script>
+    
+  </body>
+</html>

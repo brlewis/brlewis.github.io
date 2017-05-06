@@ -1,0 +1,40 @@
+{
+    "start": {
+	"description": "You are at the peak of a mountain on a clear, sunny day. As you look over the steep cliff to the south, you see a beautiful green valley below. To the east a narrow path winds down. To the west are some sharp rocks. North of you is deep snow.",
+	"exits": {
+	    "n": "crevice",
+	    "s": "cliff",
+	    "e": "path",
+	    "w": "rocks"
+	}
+    },
+    "path": {
+	"description": "You are on a narrow path leading east and west. There’s a steep cliff to the south and dangerous-looking deep snow to the north.",
+	"exits": {
+	    "n": "crevice",
+	    "s": "cliff",
+	    "e": "wooded",
+	    "w": "start"
+	}
+    },
+    "cliff": {
+	"description": "Oh no, that steep cliff with the beautiful view doesn’t seem so beautiful now -- you fell down it!",
+	"exits": {}
+    },
+    "crevice": {
+	"description": "The deep snow was hiding an ice crevice. You fall and get stuck in it!",
+	"exits": {}
+    },
+    "rocks": {
+	"description": "Steep, sharp rocks surround you, giving you no choice but to go back where you came from.",
+	"exits": {
+	    "e": "start"
+	}
+    },
+    "wooded": {
+	"description": "You start down the path and see that it is all clear, you hear birds and are undisturbed as you make your way through the wooded path. Next step to the adventure lies just ahead!",
+	"exits": {
+	    "w": "path"
+	}
+    }
+}
