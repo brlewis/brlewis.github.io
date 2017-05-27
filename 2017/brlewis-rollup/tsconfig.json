@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "jsxFactory": "m",
+        "jsx": "react"
+    },
+    "files": [
+        "index.tsx"
+    ]
+}
