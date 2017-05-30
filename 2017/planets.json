@@ -1,0 +1,42 @@
+[
+    {
+        "composition": "terrestrial",
+        "name": "Mercury",
+        "moons": 0
+    },
+    {
+        "composition": "terrestrial",
+        "name": "Venus",
+        "moons": 0
+    },
+    {
+        "composition": "terrestrial",
+        "name": "Earth",
+        "moons": 1
+    },
+    {
+        "composition": "terrestrial",
+        "name": "Mars",
+        "moons": 2
+    },
+    {
+        "composition": "gas giant",
+        "name": "Jupiter",
+        "moons": 67
+    },
+    {
+        "composition": "gas giant",
+        "name": "Saturn",
+        "moons": 62
+    },
+    {
+        "composition": "ice giant",
+        "name": "Uranus",
+        "moons": 27
+    },
+    {
+        "composition": "ice giant",
+        "name": "Neptune",
+        "moons": 14
+    }
+]
