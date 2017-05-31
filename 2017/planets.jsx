@@ -7,42 +7,53 @@ let planetFilter = planet => true;
 
 class PlanetApp {
     view() {
-        return [<PlanetFilters />, <PlanetTable planets={planets} />];
+        return (
+            <section>
+                <PlanetFilters />
+                <PlanetTable planets={planets} />
+            </section>
+        );
     }
 }
 
 class PlanetTable {
     view() {
-        return <table>
-            <tr>
-                <th>Name</th>
-                <th>Composition</th>
-                <th>Moons</th>
-            </tr>
+        return (
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Composition</th>
+                    <th>Moons</th>
+                </tr>
             {planets.filter(planetFilter).map(planet => <PlanetRow planet={planet} />)}
-        </table>;
+            </table>
+        );
     }
 }
 
 class PlanetRow {
     view(vnode) {
         const { composition, name, moons } = vnode.attrs.planet;
-        return <tr>
-            <td>{name}</td>
-            <td>{composition}</td>
-            <td>{moons}</td>
-        </tr>;
+        return (
+            <tr>
+                <td>{name}</td>
+                <td>{composition}</td>
+                <td>{moons}</td>
+            </tr>
+        );
     }
 }
 
 class PlanetFilters {
     view(vnode) {
-        return <p>
-            <PlanetFilter key="All" func={planet => true} />
-            <PlanetFilter key="Terrestrial" func={planet => planet.composition === 'terrestrial'} />
-            <PlanetFilter key="Gas Giant" func={planet => planet.composition === 'gas giant'} />
-            <PlanetFilter key="Ice Giant" func={planet => planet.composition === 'ice giant'} />
-        </p>;
+        return (
+            <p>
+                <PlanetFilter key="All" func={planet => true} />
+                <PlanetFilter key="Terrestrial" func={planet => planet.composition === 'terrestrial'} />
+                <PlanetFilter key="Gas Giant" func={planet => planet.composition === 'gas giant'} />
+                <PlanetFilter key="Ice Giant" func={planet => planet.composition === 'ice giant'} />
+            </p>
+        );
     }
 }
 
@@ -57,9 +68,11 @@ function filterHandler(filterFunction) {
 class PlanetFilter {
     view(vnode) {
         const { key, func } = vnode.attrs;
-        return <label>
-            <input type="radio" name="filter" onchange={filterHandler(func)} /> {key}
-        </label>;
+        return (
+            <label>
+                <input type="radio" name="filter" onchange={filterHandler(func)} /> {key}
+            </label>
+        );
     }
 }
 
