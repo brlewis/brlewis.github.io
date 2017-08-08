@@ -9,7 +9,7 @@
 	}
     },
     "path": {
-	"description": "You are on a narrow path leading east and west. There’s a steep cliff to the south and dangerous-looking deep snow to the north.",
+	"description": "You are on a narrow path leading east and west. There’s a steep cliff to the south and a dangerous-looking deep snow to the north.",
 	"exits": {
 	    "n": "crevice",
 	    "s": "cliff",

@@ -53,8 +53,7 @@ class NameCountCommentary {
 
 /*
  * Up to this point everything's been a reusable store or Mithril
- * component. Now it's time to tie it all together into an app. We
- * instantiate a single dispatcher and use tie it to our stores.
+ * component. Now it's time to tie it all together into an app.
  */ 
 
 const mainStore = new MainStore();
