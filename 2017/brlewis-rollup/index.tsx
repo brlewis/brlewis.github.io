@@ -1,10 +1,8 @@
-import * as m_ from 'mithril';
-let m = m_;
-import * as stream_ from 'mithril/stream';
-let stream = stream_;
+import m from 'mithril';
+import stream from 'mithril/stream';
 
 class MainStore {
-    who: stream_.Stream<string>;
+    who: stream.Stream<string>;
     constructor() {
         this.who = stream();
     }

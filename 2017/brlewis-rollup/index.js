@@ -42,7 +42,7 @@ function compileSelector(selector) {
 			var attrValue = match[6];
 			if (attrValue) attrValue = attrValue.replace(/\\(["'])/g, "$1").replace(/\\\\/g, "\\");
 			if (match[4] === "class") classes.push(attrValue);
-			else attrs[match[4]] = attrValue || true;
+			else attrs[match[4]] = attrValue === "" ? attrValue : attrValue || true;
 		}
 	}
 	if (classes.length > 0) attrs.className = classes.join(" ");
@@ -389,8 +389,15 @@ var requestService = _8(window, PromisePolyfill);
 var coreRenderer = function($window) {
 	var $doc = $window.document;
 	var $emptyFragment = $doc.createDocumentFragment();
+	var nameSpace = {
+		svg: "http://www.w3.org/2000/svg",
+		math: "http://www.w3.org/1998/Math/MathML"
+	};
 	var onevent;
 	function setEventCallback(callback) {return onevent = callback}
+	function getNameSpace(vnode) {
+		return vnode.attrs && vnode.attrs.xmlns || nameSpace[vnode.tag]
+	}
 	//create
 	function createNodes(parent, vnodes, start, end, hooks, nextSibling, ns) {
 		for (var i = start; i < end; i++) {
@@ -447,12 +454,9 @@ var coreRenderer = function($window) {
 	}
 	function createElement(parent, vnode, hooks, ns, nextSibling) {
 		var tag = vnode.tag;
-		switch (vnode.tag) {
-			case "svg": ns = "http://www.w3.org/2000/svg"; break
-			case "math": ns = "http://www.w3.org/1998/Math/MathML"; break
-		}
 		var attrs2 = vnode.attrs;
 		var is = attrs2 && attrs2.is;
+		ns = getNameSpace(vnode) || ns;
 		var element = ns ?
 			is ? $doc.createElementNS(ns, tag, {is: is}) : $doc.createElementNS(ns, tag) :
 			is ? $doc.createElement(tag, {is: is}) : $doc.createElement(tag);
@@ -515,7 +519,7 @@ var coreRenderer = function($window) {
 	//update
 	function updateNodes(parent, old, vnodes, recycling, hooks, nextSibling, ns) {
 		if (old === vnodes || old == null && vnodes == null) return
-		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, undefined);
+		else if (old == null) createNodes(parent, vnodes, 0, vnodes.length, hooks, nextSibling, ns);
 		else if (vnodes == null) removeNodes(old, 0, old.length, vnodes);
 		else {
 			if (old.length === vnodes.length) {
@@ -592,7 +596,7 @@ var coreRenderer = function($window) {
 							if (movable.dom != null) nextSibling = movable.dom;
 						}
 						else {
-							var dom = createNode(parent, v, hooks, undefined, nextSibling);
+							var dom = createNode(parent, v, hooks, ns, nextSibling);
 							nextSibling = dom;
 						}
 					}
@@ -663,10 +667,7 @@ var coreRenderer = function($window) {
 	}
 	function updateElement(old, vnode, recycling, hooks, ns) {
 		var element = vnode.dom = old.dom;
-		switch (vnode.tag) {
-			case "svg": ns = "http://www.w3.org/2000/svg"; break
-			case "math": ns = "http://www.w3.org/1998/Math/MathML"; break
-		}
+		ns = getNameSpace(vnode) || ns;
 		if (vnode.tag === "textarea") {
 			if (vnode.attrs == null) vnode.attrs = {};
 			if (vnode.text != null) {
@@ -846,12 +847,21 @@ var coreRenderer = function($window) {
 		else if (key2[0] === "o" && key2[1] === "n" && typeof value === "function") updateEvent(vnode, key2, value);
 		else if (key2 === "style") updateStyle(element, old, value);
 		else if (key2 in element && !isAttribute(key2) && ns === undefined && !isCustomElement(vnode)) {
-			//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
-			if (vnode.tag === "input" && key2 === "value" && vnode.dom.value == value && vnode.dom === $doc.activeElement) return
-			//setting select[value] to same value while having select open blinks select dropdown in Chrome
-			if (vnode.tag === "select" && key2 === "value" && vnode.dom.value == value && vnode.dom === $doc.activeElement) return
-			//setting option[value] to same value while having select open blinks select dropdown in Chrome
-			if (vnode.tag === "option" && key2 === "value" && vnode.dom.value == value) return
+			if (key2 === "value") {
+				var normalized0 = "" + value; // eslint-disable-line no-implicit-coercion
+				//setting input[value] to same value by typing on focused element moves cursor to end in Chrome
+				if ((vnode.tag === "input" || vnode.tag === "textarea") && vnode.dom.value === normalized0 && vnode.dom === $doc.activeElement) return
+				//setting select[value] to same value while having select open blinks select dropdown in Chrome
+				if (vnode.tag === "select") {
+					if (value === null) {
+						if (vnode.dom.selectedIndex === -1 && vnode.dom === $doc.activeElement) return
+					} else {
+						if (old !== null && vnode.dom.value === normalized0 && vnode.dom === $doc.activeElement) return
+					}
+				}
+				//setting option[value] to same value while having select open blinks select dropdown in Chrome
+				if (vnode.tag === "option" && old != null && vnode.dom.value === normalized0) return
+			}
 			// If you assign an input type1 that is not supported by IE 11 with an assignment expression, an error0 will occur.
 			if (vnode.tag === "input" && key2 === "type") {
 				element.setAttribute(key2, value);
@@ -966,10 +976,11 @@ var coreRenderer = function($window) {
 		if (!dom) throw new Error("Ensure the DOM element being passed to m.route/m.mount/m.render is not undefined.")
 		var hooks = [];
 		var active = $doc.activeElement;
+		var namespace = dom.namespaceURI;
 		// First time0 rendering into a node clears it out
 		if (dom.vnodes == null) dom.textContent = "";
 		if (!Array.isArray(vnodes)) vnodes = [vnodes];
-		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), false, hooks, null, undefined);
+		updateNodes(dom, dom.vnodes, Vnode.normalizeChildren(vnodes), false, hooks, null, namespace === "http://www.w3.org/1999/xhtml" ? undefined : namespace);
 		dom.vnodes = vnodes;
 		for (var i = 0; i < hooks.length; i++) hooks[i]();
 		if ($doc.activeElement !== active) active.focus();
@@ -999,7 +1010,8 @@ function throttle(callback) {
 var _11 = function($window) {
 	var renderService = coreRenderer($window);
 	renderService.setEventCallback(function(e) {
-		if (e.redraw !== false) redraw();
+		if (e.redraw === false) e.redraw = undefined;
+		else redraw();
 	});
 	var callbacks = [];
 	function subscribe(key1, callback) {
@@ -1198,7 +1210,10 @@ var _20 = function($window, redrawService0) {
 		redrawService0.subscribe(root, run1);
 	};
 	route.set = function(path, data, options) {
-		if (lastUpdate != null) options = {replace: true};
+		if (lastUpdate != null) {
+			options = options || {};
+			options.replace = true;
+		}
 		lastUpdate = null;
 		routeService.setPath(path, data, options);
 	};
@@ -1234,23 +1249,17 @@ m.request = requestService.request;
 m.jsonp = requestService.jsonp;
 m.parseQueryString = parseQueryString;
 m.buildQueryString = buildQueryString;
-m.version = "1.1.1";
+m.version = "1.1.3";
 m.vnode = Vnode;
 module["exports"] = m;
 }());
 });
 
-
-
-var m_ = Object.freeze({
-	default: mithril,
-	__moduleExports: mithril
-});
-
-var stream$3 = createCommonjsModule(function (module) {
-"use strict"
-
-;(function() {
+var stream$2 = createCommonjsModule(function (module) {
+/* eslint-disable */
+(function() {
+"use strict";
+/* eslint-enable */
 
 var guid = 0, HALT = {};
 function createStream() {
@@ -1408,43 +1417,34 @@ module["exports"] = createStream;
 }());
 });
 
-var stream$1 = stream$3;
+var stream = stream$2;
 
-
-
-var stream_ = Object.freeze({
-	default: stream$1,
-	__moduleExports: stream$1
-});
-
-var m = m_;
-var stream = stream_;
-var MainStore = (function () {
+var MainStore = /** @class */ (function () {
     function MainStore() {
         this.who = stream();
     }
     return MainStore;
 }());
-var Hello = (function () {
+var Hello = /** @class */ (function () {
     function Hello() {
     }
     Hello.prototype.view = function (vnode) {
         var store = vnode.attrs.store;
-        return m("h1", null,
+        return mithril("h1", null,
             "Hello ",
             store.who(),
             "!");
     };
     return Hello;
 }());
-var ChangeName = (function () {
+var ChangeName = /** @class */ (function () {
     function ChangeName() {
     }
     ChangeName.prototype.view = function (vnode) {
         var store = vnode.attrs.store;
-        return m("p", null,
+        return mithril("p", null,
             "Your name: ",
-            m("input", { onchange: function (event) {
+            mithril("input", { onchange: function (event) {
                     var target = event.target;
                     store.who(target.value);
                 }, value: store.who() }));
@@ -1455,12 +1455,12 @@ function NameCountStore(mainStore) {
     var count = 0;
     this.counter = mainStore.who.map(function () { return ++count; });
 }
-var NameCount = (function () {
+var NameCount = /** @class */ (function () {
     function NameCount() {
     }
     NameCount.prototype.view = function (vnode) {
         var store = vnode.attrs.store;
-        return m("p", null,
+        return mithril("p", null,
             "Count of names you have had: ",
             store.counter());
     };
@@ -1478,12 +1478,12 @@ function NameCountCommentaryStore(nameCountStore) {
             comments[count];
     });
 }
-var NameCountCommentary = (function () {
+var NameCountCommentary = /** @class */ (function () {
     function NameCountCommentary() {
     }
     NameCountCommentary.prototype.view = function (vnode) {
         var store = vnode.attrs.store;
-        return m("p", null, store.comment());
+        return mithril("p", null, store.comment());
     };
     return NameCountCommentary;
 }());
@@ -1501,15 +1501,15 @@ mainStore.who('World');
  * syntax. If you decide you don't like JSX don't worry, it's easy
  * not to use it. The Mithril documentation eschews it.
  */
-var Main = (function () {
+var Main = /** @class */ (function () {
     function Main() {
     }
     Main.prototype.view = function () {
-        return m("div", null,
-            m(Hello, { store: mainStore }),
-            m(ChangeName, { store: mainStore }),
-            m(NameCount, { store: nameCountStore }),
-            m(NameCountCommentary, { store: nameCountCommentaryStore }));
+        return mithril("div", null,
+            mithril(Hello, { store: mainStore }),
+            mithril(ChangeName, { store: mainStore }),
+            mithril(NameCount, { store: nameCountStore }),
+            mithril(NameCountCommentary, { store: nameCountCommentaryStore }));
     };
     return Main;
 }());
@@ -1517,6 +1517,6 @@ var Main = (function () {
  * Finally we start our Mithril app.
  */
 console.log('starting...');
-m.mount(document.getElementById('app'), Main);
+mithril.mount(document.getElementById('app'), Main);
 
 }());
