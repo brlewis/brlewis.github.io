@@ -11,6 +11,7 @@
     "author": "",
     "license": "ISC",
     "devDependencies": {
+        "@types/mithril": "^1.1.7",
         "mithril": "^1.1.1",
         "rollup": "^0.41.6",
         "rollup-plugin-commonjs": "^8.0.2",

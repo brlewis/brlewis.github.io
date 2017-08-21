@@ -1,25 +1,36 @@
-import m from 'mithril';
-import stream from 'mithril/stream';
+import * as m_ from 'mithril';
+let m = m_;
+import * as stream_ from 'mithril/stream';
+let stream = stream_;
+
+class MainStore {
+    who: stream_.Stream<string>;
+    constructor() {
+        this.who = stream();
+    }
+}
 
 class Hello {
     view(vnode) {
-        const store = vnode.attrs.store;
+        const store: MainStore = vnode.attrs.store;
         return <h1>Hello {store.who()}!</h1>;
     }
 }
 
 class ChangeName {
     view(vnode) {
-        const store = vnode.attrs.store;
-        return <p>Your name: <input onchange={event => store.who(event.target.value)} value={store.who()} /></p>;
+        const store: MainStore = vnode.attrs.store;
+        return <p>Your name: <input onchange={
+            (event: Event) => {
+                const target = event.target as HTMLInputElement;
+                store.who(target.value);
+            }
+        }
+            value={store.who()} /></p>;
     }
 }
 
-function MainStore() {
-    this.who = stream();
-}
-
-function NameCountStore(mainStore) {
+function NameCountStore(mainStore: MainStore) {
     let count = 0;
     this.counter = mainStore.who.map(() => ++count);
 }
@@ -33,11 +44,11 @@ class NameCount {
 
 function NameCountCommentaryStore(nameCountStore) {
     const comments = ['',
-                    'Way to be consistent!',
-                    'That\'s how many moons Mars has.',
-                    'That\'s how many sides a triangle has.',
-                    'That\'s a typical number of beats in a measure of music.',
-                    'Jackson 5 was a great band.'];
+        'Way to be consistent!',
+        'That\'s how many moons Mars has.',
+        'That\'s how many sides a triangle has.',
+        'That\'s a typical number of beats in a measure of music.',
+        'Jackson 5 was a great band.'];
 
     this.comment = nameCountStore.counter.map(count =>
         (count > comments.length) ? 'That\'s a lot of names!' :
@@ -54,7 +65,7 @@ class NameCountCommentary {
 /*
  * Up to this point everything's been a reusable store or Mithril
  * component. Now it's time to tie it all together into an app.
- */ 
+ */
 
 const mainStore = new MainStore();
 const nameCountStore = new NameCountStore(mainStore);
@@ -72,11 +83,11 @@ mainStore.who('World');
 class Main {
     view() {
         return <div>
-                 <Hello store={mainStore} />
-                 <ChangeName store={mainStore} />
-                 <NameCount store={nameCountStore} />
-                 <NameCountCommentary store={nameCountCommentaryStore} />
-               </div>;
+            <Hello store={mainStore} />
+            <ChangeName store={mainStore} />
+            <NameCount store={nameCountStore} />
+            <NameCountCommentary store={nameCountCommentaryStore} />
+        </div>;
     }
 }
 
