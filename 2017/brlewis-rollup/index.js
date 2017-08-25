@@ -1513,7 +1513,6 @@ var Main = /** @class */ (function () {
     Main.prototype.view = function () {
         return mithril("div", null,
             mithril(Hello, { store: mainStore }),
-            mithril(MainStorex, null),
             mithril(ChangeName, { store: mainStore }),
             mithril(NameCount, { store: nameCountStore }),
             mithril(NameCountCommentary, { store: nameCountCommentaryStore }));
