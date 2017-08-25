@@ -1451,10 +1451,13 @@ var ChangeName = /** @class */ (function () {
     };
     return ChangeName;
 }());
-function NameCountStore(mainStore) {
-    var count = 0;
-    this.counter = mainStore.who.map(function () { return ++count; });
-}
+var NameCountStore = /** @class */ (function () {
+    function NameCountStore(mainstore) {
+        var count = 0;
+        this.counter = mainStore.who.map(function () { return ++count; });
+    }
+    return NameCountStore;
+}());
 var NameCount = /** @class */ (function () {
     function NameCount() {
     }
@@ -1466,18 +1469,21 @@ var NameCount = /** @class */ (function () {
     };
     return NameCount;
 }());
-function NameCountCommentaryStore(nameCountStore) {
-    var comments = ['',
-        'Way to be consistent!',
-        'That\'s how many moons Mars has.',
-        'That\'s how many sides a triangle has.',
-        'That\'s a typical number of beats in a measure of music.',
-        'Jackson 5 was a great band.'];
-    this.comment = nameCountStore.counter.map(function (count) {
-        return (count > comments.length) ? 'That\'s a lot of names!' :
-            comments[count];
-    });
-}
+var NameCountCommentaryStore = /** @class */ (function () {
+    function NameCountCommentaryStore(nameCountStore) {
+        var comments = ['',
+            'Way to be consistent!',
+            'That\'s how many moons Mars has.',
+            'That\'s how many sides a triangle has.',
+            'That\'s a typical number of beats in a measure of music.',
+            'Jackson 5 was a great band.'];
+        this.comment = nameCountStore.counter.map(function (count) {
+            return (count > comments.length) ? 'That\'s a lot of names!' :
+                comments[count];
+        });
+    }
+    return NameCountCommentaryStore;
+}());
 var NameCountCommentary = /** @class */ (function () {
     function NameCountCommentary() {
     }
@@ -1507,6 +1513,7 @@ var Main = /** @class */ (function () {
     Main.prototype.view = function () {
         return mithril("div", null,
             mithril(Hello, { store: mainStore }),
+            mithril(MainStorex, null),
             mithril(ChangeName, { store: mainStore }),
             mithril(NameCount, { store: nameCountStore }),
             mithril(NameCountCommentary, { store: nameCountCommentaryStore }));

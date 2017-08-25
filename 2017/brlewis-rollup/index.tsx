@@ -88,6 +88,7 @@ class Main {
     view() {
         return <div>
             <Hello store={mainStore} />
+            <MainStorex />
             <ChangeName store={mainStore} />
             <NameCount store={nameCountStore} />
             <NameCountCommentary store={nameCountCommentaryStore} />
