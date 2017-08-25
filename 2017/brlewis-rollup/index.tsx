@@ -28,34 +28,40 @@ class ChangeName {
     }
 }
 
-function NameCountStore(mainStore: MainStore) {
-    let count = 0;
-    this.counter = mainStore.who.map(() => ++count);
+class NameCountStore {
+    counter: stream.Stream<number>;
+    constructor(mainstore: MainStore) {
+        let count = 0;
+        this.counter = mainStore.who.map(() => ++count);
+    }
 }
 
 class NameCount {
     view(vnode) {
-        const store = vnode.attrs.store;
+        const store: NameCountStore = vnode.attrs.store;
         return <p>Count of names you have had: {store.counter()}</p>;
     }
 }
 
-function NameCountCommentaryStore(nameCountStore) {
-    const comments = ['',
-        'Way to be consistent!',
-        'That\'s how many moons Mars has.',
-        'That\'s how many sides a triangle has.',
-        'That\'s a typical number of beats in a measure of music.',
-        'Jackson 5 was a great band.'];
+class NameCountCommentaryStore {
+    comment: stream.Stream<string>;
+    constructor(nameCountStore: NameCountStore) {
+        const comments = ['',
+            'Way to be consistent!',
+            'That\'s how many moons Mars has.',
+            'That\'s how many sides a triangle has.',
+            'That\'s a typical number of beats in a measure of music.',
+            'Jackson 5 was a great band.'];
 
-    this.comment = nameCountStore.counter.map(count =>
-        (count > comments.length) ? 'That\'s a lot of names!' :
-            comments[count]);
+        this.comment = nameCountStore.counter.map(count =>
+            (count > comments.length) ? 'That\'s a lot of names!' :
+                comments[count]);
+    }
 }
 
 class NameCountCommentary {
     view(vnode) {
-        const store = vnode.attrs.store;
+        const store: NameCountCommentaryStore = vnode.attrs.store;
         return <p>{store.comment()}</p>;
     }
 }
