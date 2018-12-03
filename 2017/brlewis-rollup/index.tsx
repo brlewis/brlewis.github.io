@@ -66,6 +66,25 @@ class NameCountCommentary {
     }
 }
 
+class WidthStore {
+    width: stream.Stream<number>;
+    constructor() {
+        this.width = stream(window.innerWidth);
+        window.addEventListener('resize', () => {
+            this.width(window.innerWidth);
+            m.redraw();
+        });
+    }
+}
+
+const widthStore: WidthStore = new WidthStore();
+
+class MyResponsiveComponent {
+    view(vnode) {
+        return <p>Window width is {widthStore.width()}</p>;
+    }
+}
+
 /*
  * Up to this point everything's been a reusable store or Mithril
  * component. Now it's time to tie it all together into an app.
@@ -91,6 +110,7 @@ class Main {
             <ChangeName store={mainStore} />
             <NameCount store={nameCountStore} />
             <NameCountCommentary store={nameCountCommentaryStore} />
+            <MyResponsiveComponent />
         </div>;
     }
 }
