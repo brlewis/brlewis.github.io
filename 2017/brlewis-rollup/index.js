@@ -1493,6 +1493,28 @@ var NameCountCommentary = /** @class */ (function () {
     };
     return NameCountCommentary;
 }());
+var WidthStore = /** @class */ (function () {
+    function WidthStore() {
+        var _this = this;
+        this.width = stream(window.innerWidth);
+        window.addEventListener('resize', function () {
+            _this.width(window.innerWidth);
+            mithril.redraw();
+        });
+    }
+    return WidthStore;
+}());
+var widthStore = new WidthStore();
+var MyResponsiveComponent = /** @class */ (function () {
+    function MyResponsiveComponent() {
+    }
+    MyResponsiveComponent.prototype.view = function (vnode) {
+        return mithril("p", null,
+            "Window width is ",
+            widthStore.width());
+    };
+    return MyResponsiveComponent;
+}());
 /*
  * Up to this point everything's been a reusable store or Mithril
  * component. Now it's time to tie it all together into an app.
@@ -1515,7 +1537,8 @@ var Main = /** @class */ (function () {
             mithril(Hello, { store: mainStore }),
             mithril(ChangeName, { store: mainStore }),
             mithril(NameCount, { store: nameCountStore }),
-            mithril(NameCountCommentary, { store: nameCountCommentaryStore }));
+            mithril(NameCountCommentary, { store: nameCountCommentaryStore }),
+            mithril(MyResponsiveComponent, null));
     };
     return Main;
 }());
