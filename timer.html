@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Table Topics Timer</title>
+    <title>Pushups Timer</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flux/2.1.1/Flux.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mithril/0.2.0/mithril.js"></script>
     <script src="https://cdn.rawgit.com/insin/msx/master/dist/MSXTransformer.js"></script>
@@ -43,9 +43,9 @@ var TimerApp = {
         ctrl.startTime = (new Date()).getTime();
         ctrl.previous = 0;
         ctrl.elapsed = 0;
-        ctrl.minimum = 6;
-        ctrl.warning = 9;
-        ctrl.maximum = 12;
+        ctrl.minimum = 30;
+        ctrl.warning = 50;
+        ctrl.maximum = 60;
         ctrl.status = 'time-early';
 
         function tick() {
@@ -68,7 +68,7 @@ var TimerApp = {
 
         ctrl.start = function() {
             ctrl.startTime = (new Date()).getTime();
-            ctrl.ticker = setInterval(tick, 1000);
+            ctrl.ticker = setInterval(tick, 100);
         };
 
         ctrl.stop = function() {
