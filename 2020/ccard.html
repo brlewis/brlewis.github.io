@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <title>Credit Card input demo</title>
+    <style>
+      *:invalid::after {
+          content: "invalid";
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Enter a 16-digit number (not a real credit card)</h1>
+    <p>
+      <form>
+        Using inputmode:
+        <input type=”text” inputmode=”numeric” pattern="[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{4}">
+      </form>
+    </p>
+    <p>
+      <form>
+        Using type="tel":
+        <input type=”tel” pattern="[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{4}">
+      </form>
+    </p>
+  </body>
+</html>
